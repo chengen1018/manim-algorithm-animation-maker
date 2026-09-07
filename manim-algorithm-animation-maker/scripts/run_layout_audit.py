@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -9,10 +10,15 @@ import traceback
 from contextlib import contextmanager
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 
 
 ACTIVE_VISIBLE_AUDITOR = None
 VISIBLE_LEVEL_ORDER = {"error": 3, "warning": 2, "info": 1}
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,19 +64,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--visible-include-descendants",
         action="store_true",
-        help="Include descendants of non-container mobjects. This is noisier and usually not needed.",
+        help="Deprecated compatibility flag; structural containers are always traversed and atomic families remain leaves.",
     )
     parser.add_argument(
         "--visible-max-reports",
         type=int,
         default=250,
-        help="Maximum number of unique visible-audit messages to print. Visible errors still affect exit status.",
+        help="Maximum number of visible-audit findings to print; the JSON report always contains every finding.",
     )
     parser.add_argument(
         "--visible-report-level",
         choices=("error", "warning", "info"),
         default="warning",
         help="Minimum visible-audit report level to print. Defaults to warning, which suppresses strict-containment info logs.",
+    )
+    parser.add_argument(
+        "--visible-report",
+        help="Complete JSON report path. Defaults beside the scene file, named for the Scene class.",
+    )
+    parser.add_argument(
+        "--visible-exceptions",
+        help="Optional project-local JSON file containing exact, source-bound warning dispositions.",
     )
     parser.add_argument(
         "--traceback",
@@ -87,10 +101,11 @@ def gate_failures(
     checkpoints: list[str],
     require_adapter: bool,
 ) -> list[str]:
-    del visible_warnings
     failures: list[str] = []
     if visible_errors:
-        failures.append(f"{visible_errors} visible object finding(s) exceeded the frame")
+        failures.append(f"{visible_errors} visible layout error(s)")
+    if visible_warnings:
+        failures.append(f"{visible_warnings} unresolved visible layout warning(s)")
     if not require_adapter:
         return failures
 
@@ -168,22 +183,181 @@ def adapter_checkpoints() -> list[str]:
     return []
 
 
+def registered_graph_roots() -> list[tuple[object, str | None]]:
+    module = sys.modules.get("scene_layout_audit")
+    get_roots = getattr(module, "get_layout_audit_graph_roots", None)
+    if callable(get_roots):
+        return list(get_roots())
+    return []
+
+
+REQUIRED_EXCEPTION_FIELDS = {
+    "scene_class",
+    "checkpoint",
+    "objects",
+    "relation",
+    "explanation",
+    "supporting_reference",
+    "source_sha256",
+}
+NON_WAIVABLE_RELATIONS = {
+    "ambiguous-graph-membership",
+    "ambiguous-structural-parent",
+    "exception-error",
+    "frame-overflow-bottom",
+    "frame-overflow-left",
+    "frame-overflow-right",
+    "frame-overflow-top",
+    "tool-failure",
+    "unclassified",
+}
+
+
+def load_exception_file(path: Path | None) -> tuple[list[dict[str, Any]], list[str], str | None]:
+    if path is None:
+        return [], [], None
+    file_hash = None
+    try:
+        if path.is_file():
+            file_hash = sha256(path)
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return [], [f"cannot read exception file {path}: {exc}"], file_hash
+    if not isinstance(payload, dict) or not isinstance(payload.get("exceptions"), list):
+        return [], ["exception file must be an object with an exceptions array"], file_hash
+    records = payload["exceptions"]
+    errors: list[str] = []
+    for index, record in enumerate(records):
+        if not isinstance(record, dict):
+            errors.append(f"exception[{index}] must be an object")
+            continue
+        missing = REQUIRED_EXCEPTION_FIELDS - set(record)
+        if missing:
+            errors.append(f"exception[{index}] is missing: {', '.join(sorted(missing))}")
+    return records, errors, file_hash
+
+
+def apply_warning_exceptions(
+    entries: list[dict[str, Any]],
+    exceptions: list[dict[str, Any]],
+    *,
+    scene_class: str,
+    source_sha256: str,
+) -> list[str]:
+    errors: list[str] = []
+    seen_exception_keys: set[tuple[object, ...]] = set()
+    current_scene_exceptions: list[tuple[int, dict[str, Any]]] = []
+    for index, record in enumerate(exceptions):
+        if not isinstance(record, dict) or REQUIRED_EXCEPTION_FIELDS - set(record):
+            continue
+        scalar_fields = (
+            "scene_class",
+            "checkpoint",
+            "relation",
+            "explanation",
+            "supporting_reference",
+            "source_sha256",
+        )
+        if any(not isinstance(record[field], str) or not record[field].strip() for field in scalar_fields):
+            errors.append(f"exception[{index}] requires non-empty string fields")
+            continue
+        objects = record["objects"]
+        if (
+            not isinstance(objects, list)
+            or len(objects) != 2
+            or any(not isinstance(value, str) or not value.strip() for value in objects)
+        ):
+            errors.append(f"exception[{index}] objects must contain exactly two non-empty names")
+            continue
+        match_values = (
+            record["scene_class"],
+            record["checkpoint"],
+            record["relation"],
+            record["source_sha256"],
+            *objects,
+        )
+        if any("*" in value or "?" in value for value in match_values):
+            errors.append(f"exception[{index}] contains a wildcard")
+            continue
+        if record["source_sha256"].lower() != source_sha256.lower():
+            errors.append(f"exception[{index}] has a stale source SHA-256")
+            continue
+        if record["scene_class"] != scene_class:
+            errors.append(
+                f"exception[{index}] scene_class {record['scene_class']!r} "
+                f"does not match audited scene {scene_class!r}"
+            )
+            continue
+        if record["relation"] in NON_WAIVABLE_RELATIONS:
+            errors.append(f"exception[{index}] targets non-waivable relation {record['relation']}")
+            continue
+        if record["relation"] == "text-occlusion" and not any(
+            marker in record["supporting_reference"]
+            for marker in ("confirmed_requirements.md", "animation_design.md")
+        ):
+            errors.append(
+                f"exception[{index}] text occlusion requires a confirmed_requirements.md "
+                "or animation_design.md reference"
+            )
+            continue
+        key = (
+            record["scene_class"],
+            record["checkpoint"],
+            tuple(objects),
+            record["relation"],
+            record["source_sha256"].lower(),
+        )
+        if key in seen_exception_keys:
+            errors.append(f"exception[{index}] duplicates another exact exception")
+            continue
+        seen_exception_keys.add(key)
+        current_scene_exceptions.append((index, record))
+
+    for index, record in current_scene_exceptions:
+        matches = [
+            entry
+            for entry in entries
+            if entry["context"] == record["checkpoint"]
+            and entry["finding"].severity == "WARNING"
+            and entry["finding"].waivable
+            and list(entry["finding"].objects) == record["objects"]
+            and entry["finding"].relation == record["relation"]
+        ]
+        if len(matches) != 1:
+            errors.append(f"exception[{index}] matches {len(matches)} warning findings; expected exactly one")
+            continue
+        finding = matches[0]["finding"]
+        finding.accepted = True
+        finding.exception_index = index
+    return errors
+
+
 class VisibleAuditAccumulator:
-    def __init__(self, args: argparse.Namespace, scene_class_name: str):
+    def __init__(self, args: argparse.Namespace, scene_class_name: str, source_path: Path):
         self.args = args
         self.scene_class_name = scene_class_name
+        self.source_path = source_path
+        self.source_sha256 = sha256(source_path)
+        self.render_profile_path = (
+            Path(args.render_profile).expanduser().resolve() if getattr(args, "render_profile", None) else None
+        )
+        self.render_profile_sha256 = (
+            sha256(self.render_profile_path)
+            if self.render_profile_path is not None and self.render_profile_path.is_file()
+            else None
+        )
         self.play_index = 0
+        self.entries: list[dict[str, Any]] = []
+        self.exception_path = Path(args.visible_exceptions).expanduser().resolve() if args.visible_exceptions else None
+        self.exception_sha256: str | None = None
         self.error_count = 0
         self.warning_count = 0
+        self.accepted_warning_count = 0
         self.info_count = 0
-        self.printed_count = 0
-        self.limit_notice_printed = False
-        self.seen_messages: set[tuple[str, str]] = set()
 
     def after_play(self, scene) -> None:
         if self.args.visible_final_only:
             return
-
         self.play_index += 1
         self.audit(scene, f"{self.scene_class_name}:after-play-{self.play_index:04d}")
 
@@ -200,67 +374,94 @@ class VisibleAuditAccumulator:
             containment_padding=self.args.visible_containment_padding,
             overlap_epsilon=self.args.visible_overlap_epsilon,
             include_descendants=self.args.visible_include_descendants,
+            graph_roots=registered_graph_roots(),
+        )
+        self.entries.extend({"context": result.context, "finding": finding} for finding in result.findings)
+
+    def add_tool_error(self, message: str) -> None:
+        from visible_layout_audit import VisibleFinding
+
+        self.entries.append(
+            {
+                "context": f"{self.scene_class_name}:tool",
+                "finding": VisibleFinding("ERROR", "tool-failure", (), message, waivable=False),
+            }
         )
 
-        for message in result.errors:
-            self._record("ERROR", result.context, message)
-        for message in result.warnings:
-            self._record("WARNING", result.context, message)
-        for message in result.infos:
-            self._record("INFO", result.context, message)
-
-    def _record(self, level: str, context: str, message: str) -> None:
-        key = (level, self._dedupe_signature(message))
-        if key in self.seen_messages:
-            return
-
-        self.seen_messages.add(key)
-        if level == "ERROR":
-            self.error_count += 1
-        elif level == "WARNING":
-            self.warning_count += 1
-        else:
-            self.info_count += 1
-
-        if not self._should_print(level):
-            return
-
-        if self.printed_count < self.args.visible_max_reports:
-            prefix = f"[visible-layout:{context}]"
-            print(f"{prefix} {level} {message}")
-            self.printed_count += 1
-            return
-
-        if not self.limit_notice_printed:
-            print(
-                f"[layout-runner] "
-                f"visible report limit reached ({self.args.visible_max_reports}); suppressing further unique messages"
+    def finalize(self) -> None:
+        exceptions, errors, exception_hash = load_exception_file(self.exception_path)
+        self.exception_sha256 = exception_hash
+        errors.extend(
+            apply_warning_exceptions(
+                self.entries,
+                exceptions,
+                scene_class=self.scene_class_name,
+                source_sha256=self.source_sha256,
             )
-            self.limit_notice_printed = True
+        )
+        for message in errors:
+            self.add_tool_error(message)
 
-    def _should_print(self, level: str) -> bool:
-        current = VISIBLE_LEVEL_ORDER[level.lower()]
-        minimum = VISIBLE_LEVEL_ORDER[self.args.visible_report_level]
-        return current >= minimum
+        self.error_count = sum(entry["finding"].severity == "ERROR" for entry in self.entries)
+        self.accepted_warning_count = sum(
+            entry["finding"].severity == "WARNING" and entry["finding"].accepted for entry in self.entries
+        )
+        self.warning_count = sum(
+            entry["finding"].severity == "WARNING" and not entry["finding"].accepted for entry in self.entries
+        )
+        self.info_count = sum(entry["finding"].severity == "INFO" for entry in self.entries)
+        self._print_findings()
 
-    def _dedupe_signature(self, message: str) -> str:
-        if "overlaps" in message:
-            relation = "overlaps"
-        elif "is strictly inside" in message:
-            relation = "inside"
-        elif "exceeds left frame" in message:
-            relation = "exceeds-left"
-        elif "exceeds right frame" in message:
-            relation = "exceeds-right"
-        elif "exceeds bottom frame" in message:
-            relation = "exceeds-bottom"
-        elif "exceeds top frame" in message:
-            relation = "exceeds-top"
-        else:
-            relation = "other"
+    def _print_findings(self) -> None:
+        printable = [
+            entry
+            for entry in self.entries
+            if VISIBLE_LEVEL_ORDER[entry["finding"].severity.lower()]
+            >= VISIBLE_LEVEL_ORDER[self.args.visible_report_level]
+        ]
+        for entry in printable[: self.args.visible_max_reports]:
+            finding = entry["finding"]
+            disposition = " ACCEPTED" if finding.accepted else ""
+            print(
+                f"[visible-layout:{entry['context']}] "
+                f"{finding.severity}{disposition} {finding.message}"
+            )
+        if len(printable) > self.args.visible_max_reports:
+            print(
+                f"[layout-runner] visible report limit reached ({self.args.visible_max_reports}); "
+                f"{len(printable) - self.args.visible_max_reports} finding(s) omitted from human output only"
+            )
 
-        bounds = message[message.find("(") :] if "(" in message else message
-        return f"{relation}:{bounds}"
+    def write_report(self, path: Path, gate_result: str, checkpoints: list[str], gate_failures: list[str]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        findings = []
+        for entry in self.entries:
+            finding = entry["finding"].to_dict()
+            finding["scene_class"] = self.scene_class_name
+            finding["checkpoint"] = entry["context"]
+            findings.append(finding)
+        report = {
+            "schema_version": 1,
+            "scene_class": self.scene_class_name,
+            "source_path": str(self.source_path),
+            "source_sha256": self.source_sha256,
+            "render_profile_path": str(self.render_profile_path) if self.render_profile_path else None,
+            "render_profile_sha256": self.render_profile_sha256,
+            "exception_file": str(self.exception_path) if self.exception_path else None,
+            "exception_file_sha256": self.exception_sha256,
+            "adapter_checkpoints": checkpoints,
+            "summary": {
+                "total_findings": len(findings),
+                "accepted_warnings": self.accepted_warning_count,
+                "unresolved_warnings": self.warning_count,
+                "errors": self.error_count,
+                "infos": self.info_count,
+            },
+            "gate_failures": gate_failures,
+            "gate_result": gate_result,
+            "findings": findings,
+        }
+        path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 def load_module(scene_file: Path) -> ModuleType:
@@ -385,7 +586,15 @@ def main() -> int:
         os.environ["MANIM_LAYOUT_AUDIT_FAIL"] = "1"
     os.environ["MANIM_LAYOUT_DRY_RUN"] = "1"
 
+    visible_auditor = None
+    scene_class_name = args.scene_class or scene_file.stem
     try:
+        if args.visible_max_reports < 0:
+            raise RuntimeError("--visible-max-reports must be zero or greater")
+        if args.visible_exceptions and not args.audit_visible:
+            raise RuntimeError("--visible-exceptions requires --audit-visible")
+        if args.audit_visible:
+            visible_auditor = VisibleAuditAccumulator(args, scene_class_name, scene_file)
         if args.require_adapter and not args.render_profile:
             raise RuntimeError("--require-adapter requires --render-profile")
         if args.render_profile:
@@ -395,8 +604,10 @@ def main() -> int:
             apply_render_profile(profile_path)
         module = load_module(scene_file)
         scene_class = find_scene_class(module, args.scene_class)
+        scene_class_name = scene_class.__name__
+        if visible_auditor is not None:
+            visible_auditor.scene_class_name = scene_class_name
         reset_adapter_checkpoints()
-        visible_auditor = VisibleAuditAccumulator(args, scene_class.__name__) if args.audit_visible else None
         with patched_scene_methods(visible_auditor):
             scene = scene_class()
             scene.construct()
@@ -404,6 +615,17 @@ def main() -> int:
                 visible_auditor.final(scene)
     except Exception as exc:
         print(f"[layout-runner] failed: {exc}", file=sys.stderr)
+        if visible_auditor is not None:
+            visible_auditor.add_tool_error(str(exc))
+            visible_auditor.finalize()
+            report_path = (
+                Path(args.visible_report).expanduser().resolve()
+                if args.visible_report
+                else scene_file.parent / f"layout_audit_report.{scene_class_name}.json"
+            )
+            visible_auditor.write_report(report_path, "FAIL", adapter_checkpoints(), [str(exc)])
+            print(f"[layout-runner] complete visible report: {report_path} SHA-256={sha256(report_path)}")
+            print("[layout-runner] final gate result: FAIL")
         if args.traceback:
             traceback.print_exc()
         return 1
@@ -411,6 +633,18 @@ def main() -> int:
     print(f"[layout-runner] completed dry-run for {scene_class.__name__}")
     checkpoints = adapter_checkpoints()
     print(f"[layout-runner] adapter checkpoints ({len(checkpoints)}): {', '.join(checkpoints) or 'none'}")
+    if visible_auditor is not None:
+        visible_auditor.finalize()
+        print(
+            "[layout-runner] visible summary: "
+            f"total={len(visible_auditor.entries)} "
+            f"accepted_warnings={visible_auditor.accepted_warning_count} "
+            f"unresolved_warnings={visible_auditor.warning_count} "
+            f"errors={visible_auditor.error_count} "
+            f"infos={visible_auditor.info_count} "
+            f"exception_file={visible_auditor.exception_path or 'none'} "
+            f"exception_SHA-256={visible_auditor.exception_sha256 or 'none'}"
+        )
     failures = gate_failures(
         visible_errors=visible_auditor.error_count if visible_auditor is not None else 0,
         visible_warnings=visible_auditor.warning_count if visible_auditor is not None else 0,
@@ -419,6 +653,15 @@ def main() -> int:
     )
     for failure in failures:
         print(f"[layout-runner] gate failure: {failure}", file=sys.stderr)
+    if visible_auditor is not None:
+        report_path = (
+            Path(args.visible_report).expanduser().resolve()
+            if args.visible_report
+            else scene_file.parent / f"layout_audit_report.{scene_class.__name__}.json"
+        )
+        visible_auditor.write_report(report_path, "FAIL" if failures else "PASS", checkpoints, failures)
+        print(f"[layout-runner] complete visible report: {report_path} SHA-256={sha256(report_path)}")
+    print(f"[layout-runner] final gate result: {'FAIL' if failures else 'PASS'}")
     if failures:
         return 1
     return 0

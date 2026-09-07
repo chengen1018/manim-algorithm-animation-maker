@@ -106,22 +106,30 @@ Scene 1–3 完成後，先決定動畫要講哪些複雜度內容。主要 Agen
 
 只有原本的 `scene_writer` 回報 `DONE`，且兩個 Writer Expected outputs `generated_algo_scene.py` 與 `scene_layout_audit.py` 都存在時，`CODE_PREPARATION` gate 才能通過。若回報 `BLOCKED` 或輸出不完整，留在 `CODE_PREPARATION`，使用 `followup_task` 將具體缺口交回原本的 `scene_writer`。
 
-### 子階段 2：LAYOUT_VERIFICATION
-CODE_PREPARATION gate 通過後，依同一協定的 `scene_layout_validator` Dispatch Profile 呼叫 `spawn_agent`，初次派遣 validator。
+Writer 必須依 `references/layout-audit.md` 建立 checkpoint adapter、明確註冊真正的 graph wrapper，且不得忽略、隱藏或降級泛用掃描產生的 warning。
+可見 leaf 或 subgroup 在 checkpoint 只能有一個直接 structural owner；邏輯分類使用 Python collection，不得用同時掛入 Scene 的共享 `VGroup` 製造多 parent。Graph 內文字若被上層可見物件遮擋也必須回報 blocking `WARNING`。
 
-若原本的 `scene_layout_validator` 回報 `BLOCKED` 或 `layout_audit_result.md` 缺失，留在 `LAYOUT_VERIFICATION`，依 blocking evidence 處理，並使用 `followup_task` 交回原本的 `scene_layout_validator`。
+### 子階段 2：PRE-LAYOUT CONTRACT REVIEW
+CODE_PREPARATION gate 通過後，先依 `scene_reviewer` Dispatch Profile 初次派遣 reviewer。此時不要求 layout result；reviewer 必須完整檢查教學流程／演算法是否充分、state、beat、lifecycle、cleanup，以及每個 registered graph root 是否真為 graph 且未混入 panel、table、card、matrix、整幕或其他無關 UI。
 
-只有原本的 `scene_layout_validator` 回報 `DONE`，且 `layout_audit_result.md` 存在並為 `PASS`、完整涵蓋五個核准 Scene、所有必要命令均 exit `0` 時，layout gate 才能通過。若原本的 `scene_layout_validator` 回報 `DONE` 且 `layout_audit_result.md` 存在，但結果為 `FAIL`、未完整涵蓋五個核准 Scene 或任一必要命令非 exit `0`，留在 Stage 4，使用 `followup_task` 將 `layout_audit_result.md` 的絕對路徑交回原本的 `scene_writer`。
+只有 `scene_review_result.md` 為 `PRELAYOUT_PASS` 才能進入 layout。`FAIL` 時將具體 findings 交回原本的 `scene_writer` 大幅修正，再由原 reviewer 完整重審目前 source。
 
-### 子階段 3：CONTRACT_REVIEW
-目前 layout gate 通過後，依同一協定的 `scene_reviewer` Dispatch Profile 呼叫 `spawn_agent`，初次派遣 reviewer。
+### 子階段 3：LAYOUT VERIFICATION AND TRIAGE
+PRELAYOUT_PASS 後，依 `scene_layout_validator` Dispatch Profile 初次派遣 validator。Validator 是唯一可執行 runner、讀取完整 raw JSON 與產生 `layout_audit_result.md` 的角色；另以 `scripts/summarize_layout_audit.py` 產生 `layout_audit_summary.json` 與 `layout_audit_triage.md`。Raw JSON 與 gate result 保持權威，grouped summary 不改變任何 finding 或 PASS/FAIL。
 
-若原本的 `scene_reviewer` 回報 `BLOCKED` 或 `scene_review_result.md` 缺失，留在 `CONTRACT_REVIEW`，依 blocking evidence 處理，並使用 `followup_task` 交回原本的 `scene_reviewer`。
+Layout FAIL 時，Coordinator 只將 triage 路徑與指定 blocking groups 交回原本 Writer，不把完整 reports 注入 Writer context。Writer 不得自行執行 audit、讀取完整 raw JSON、降級 warning 或批准豁免；修正後由原 Validator 重跑。迭代可只跑受影響 Scene，但 final gate 必須完整重跑五幕。
 
-只有原本的 `scene_reviewer` 回報 `DONE`，且 `scene_review_result.md` 存在並為 `PASS` 時，contract review gate 才能通過。若原本的 `scene_reviewer` 回報 `DONE` 且 `scene_review_result.md` 存在，但結果為 `FAIL`，留在 Stage 4，使用 `followup_task` 將 `scene_review_result.md` 的絕對路徑交回原本的 `scene_writer`。
+泛用可見掃描中，同 graph line/line 等排版仍為 `INFO` best-effort；常見封閉 node 外形之間先排除完整 containment，再將實際 node/node overlap 視為 blocking `WARNING`，其中 Circle/Circle 使用圓形 narrow phase。其他 warning 不得忽略或降級，且 `unresolved warning count > 0` 必須 `FAIL`。
+
+### 子階段 4：FINAL DIFF AND EXCEPTION REVIEW
+Layout 修正收斂後，使用 `followup_task` 交回原本 reviewer。Reviewer 比較 pre-layout baseline 與目前 source：純位置、尺寸、間距、font size、z-index 等 layout-only diff 可聚焦複查；若 beat、文字、演算法資料、state、Transform ownership、helper 語意、graph-root 範圍或可見內容改變，必須回到完整 contract review。
+
+若 Writer 因使用者要求或核准設計提出 exception proposal，Reviewer 必須逐筆核對 raw finding、source hash、精確 Scene/checkpoint/object pair/relation 與 supporting reference，寫出 `APPROVED` 或 `REJECTED`。Writer 不得批准自己的 proposal，Validator 也不得自行接受理由。
+
+Reviewer 對最終 source 寫入 `Result: PASS` 與 `Final Reviewed Code SHA-256` 後，Validator 才執行最後一次完整五幕 audit，並只套用 reviewer 明確批准的 exceptions。只有 final audit `PASS`、reviewed/audited source hash 相同、summary outputs 完整且五幕 command 全部 exit `0`，Stage 4 才通過。
 
 ### Source-repair invariant
-每次 `generated_algo_scene.py` 修改後，舊的 layout result 與 scene review 立即失效，並依 `CODE_PREPARATION → 完整 layout audit → contract review` 重新取得 gate。對已完成初次派遣的角色，使用 `followup_task` 重用原本 target；流程首次抵達尚未派遣的角色時，才依既有 Dispatch Profile 使用 `spawn_agent`。
+語義或結構性修改會同時使 pre-layout review、final review 與 layout evidence 失效，回到完整 PRE-LAYOUT CONTRACT REVIEW。明確的 layout-only 修改可保留 pre-layout baseline，但仍須 final focused review；任何 source 修改都使舊 raw reports、summary、final review hash 與 exceptions 失效。對已派遣角色一律使用 `followup_task` 重用原 target。
 
 ### 必要輸出
 Stage 4 只建立並接受：
@@ -129,6 +137,10 @@ Stage 4 只建立並接受：
 - `generated_algo_scene.py`
 - `scene_layout_audit.py`
 - `layout_audit_result.md`
+- `layout_audit_summary.json`
+- `layout_audit_triage.md`
+- 五個完整 `layout_audit_report.<SceneClass>.json`
+- 每幕專用的 layout exception JSON（只有核准來源明確要求 warning disposition 時）
 - `scene_review_result.md`
 
 五個 Scene MP4、合併 MP4 與 `render_manifest.md` 都屬於 Stage 5，不得用來補足或取代 Stage 4 gate。
@@ -137,7 +149,11 @@ Stage 4 只建立並接受：
 只有以下條件全部成立才能進入 `FINAL_RENDER_AND_DELIVERY_CHECK`：
 
 - `layout_audit_result.md = PASS`，五個核准 Scene 的必要命令都 exit `0`。
-- `scene_review_result.md = PASS`。
+- `layout_audit_summary.json` 與 `layout_audit_triage.md` 都存在並記錄於 layout result；兩者只作 derived navigation，不取代 raw gate。
+- 五個完整 machine-readable visible reports 都存在並保留 graph 內的 `INFO`，且每幕 unresolved warnings 與 errors 都是 `0`；accepted warnings 皆有有效精確例外。
+- `scene_review_result.md = PASS`，且由未參與程式碼撰寫的獨立 reviewer 產出。
+- 目前 `generated_algo_scene.py` SHA-256、layout result 的 `Audited Code SHA-256` 與 review result 的 `Final Reviewed Code SHA-256` 全部一致；所有 accepted warning 都在 review result 中逐筆 `APPROVED`。
+- layout result 記錄的 `Render Profile SHA-256` 等於目前 `render_profile.json` 的 SHA-256。
 - PASS 後程式碼、Stage 4 Required inputs、runner 或 `render_profile.json` 都沒有改變。
 
 本機自行檢查、dry-run 可執行、非正式 review 或提早產生的 MP4 都不能取代上述 gate。
@@ -174,7 +190,7 @@ Helper 以唯讀方式對五個 Scene MP4 + combined MP4 = 六個 MP4 執行 `ff
 ### Stage 5 repair and rollback invariant
 若問題只涉及輸出、render command、concat、manifest 或 media decode，且 source、render profile 與 Stage 4 gate evidence 都未改變，留在 `FINAL_RENDER`。Coordinator 使用 `followup_task` 將失敗證據與需重建的絕對路徑交回原本的 `scene_final_renderer`，由 renderer 依 render guide 修復受影響的輸出與 manifest。Renderer 回報 `DONE` 且目前 Expected outputs 完整後，Coordinator 重新執行 `DELIVERY_CHECK`。
 
-若 Stage 4 PASS 後程式碼改變，回到 Stage 4 `CODE_PREPARATION`；若 `render_profile.json` 改變，回到 `CODE_PREPARATION`；若 profile 未改變但執行環境或 runner 改變，回到 `LAYOUT_VERIFICATION`；若上游需求、設計、腳本或旁白契約改變，回到擁有該內容的 Stage。只要重新產生任一 MP4 或 manifest，舊的 `delivery_check_result.md` 立即失效；必須依目前產物重新執行 `DELIVERY_CHECK`。
+若 Stage 4 PASS 後程式碼改變，回到 Stage 4 `CODE_PREPARATION`；若 `render_profile.json` 改變，回到 `CODE_PREPARATION`；若 profile 未改變但執行環境、runner 或 summarizer 改變，回到 `LAYOUT VERIFICATION AND TRIAGE` 並重建 final audit evidence；若上游需求、設計、腳本或旁白契約改變，回到擁有該內容的 Stage。只要重新產生任一 MP4 或 manifest，舊的 `delivery_check_result.md` 立即失效；必須依目前產物重新執行 `DELIVERY_CHECK`。
 
 ### 必要輸出與 Exit gate
 Stage 5 必須建立：
