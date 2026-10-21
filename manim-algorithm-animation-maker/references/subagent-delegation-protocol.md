@@ -25,8 +25,8 @@
 | 教學腳本審查 | `script_reviewer` | `references/subagent-script-reviewer.md` | `none` | `gpt-5.6-terra` | `high` |
 | 旁白產生 | `voiceover_generator` | `references/subagent-voiceover-generator.md` | `none` | `gpt-5.6-luna` | `medium` |
 | 場景程式碼 | `scene_writer` | `references/subagent-scene-writer.md` | `none` | `gpt-5.6-sol` | `high` |
-| 渲染前 Scene 版面驗證 | `scene_layout_validator` | `references/subagent-scene-layout-validator.md` | `none` | `gpt-5.6-luna` | `medium` |
 | 場景程式碼審查 | `scene_reviewer` | `references/subagent-scene-reviewer.md` | `none` | `gpt-5.6-terra` | `high` |
+| 渲染前 Scene 版面驗證 | `scene_layout_validator` | `references/subagent-scene-layout-validator.md` | `none` | `gpt-5.6-luna` | `medium` |
 | 正式場景渲染與合併 | `scene_final_renderer` | `references/subagent-scene-final-renderer.md` | `none` | `gpt-5.6-luna` | `xhigh` |
 
 每次呼叫 `spawn_agent` 時，必須將角色對應列中的 `task_name`、`fork_turns`、`model` 與 `reasoning_effort` 明確傳為 tool arguments。這些設定不得只寫入派遣 `message`。若 runtime 不接受指定的 model 或 reasoning effort，回報 `BLOCKED`；不得自行改用其他設定。
@@ -186,7 +186,7 @@ Dispatch Profile 只用於角色的初次 `spawn_agent`。協調者必須保留 
 - `Layout audit guide`：`references/layout-audit.md` 的絕對路徑
 - `Layout helper`：`scripts/scene_layout_audit.py` 的絕對路徑
 
-`Conditional inputs`：`None — no conditional inputs`。
+`Conditional inputs`：初次派遣為 `None — no conditional inputs`；layout 修正 follow-up 只附 `Layout audit triage`（`<project-root>/layout_audit_triage.md`）與 Coordinator 指定的 blocking group，不附完整 raw JSON。
 
 `Expected output` 必須逐項包含：
 
@@ -215,16 +215,23 @@ Dispatch Profile 只用於角色的初次 `spawn_agent`。協調者必須保留 
 - `Scene source`：`<project-root>/generated_algo_scene.py`
 - `Project layout helper`：`<project-root>/scene_layout_audit.py`
 - `Render profile`：`<project-root>/render_profile.json`
+- `Pre-layout Scene review result`：`<project-root>/scene_review_result.md`（必須為 `PRELAYOUT_PASS`；final run 必須為 `PASS`）
 - `Layout audit guide`：`references/layout-audit.md` 的絕對路徑
 - `Layout audit runner`：`scripts/run_layout_audit.py` 的絕對路徑
+- `Layout audit summarizer`：`scripts/summarize_layout_audit.py` 的絕對路徑
 
-`Conditional inputs`：`None — no conditional inputs`。
+`Conditional inputs`：Reviewer 明確批准的 per-Scene exception paths/hashes；沒有時明記 none。未批准 proposal 不得派給 Validator 使用。
 
 `Required dispatch data` 必須包含：
 
 - `Scene classes and approved order`：已核准設計的 Scene 1–5 對應目前 source 的五個 Scene class；必須逐項照錄
+- `Validation phase`：初次為 `initial`、Writer layout 修正後為 `iteration`、Reviewer final `PASS` 後為 `final`
 
-`Expected output`：`<project-root>/layout_audit_result.md`。
+`Expected output` 必須逐項包含：
+
+- `Layout audit result`：`<project-root>/layout_audit_result.md`
+- `Layout audit grouped summary`：`<project-root>/layout_audit_summary.json`
+- `Layout audit triage`：`<project-root>/layout_audit_triage.md`
 
 ## Dispatch Profile: `scene_reviewer`
 
@@ -251,10 +258,15 @@ Dispatch Profile 只用於角色的初次 `spawn_agent`。協調者必須保留 
 - `Teaching script`：`<project-root>/teaching_script.md`
 - `Script review result`：`<project-root>/script_review_result.md`
 - `Scene source`：`<project-root>/generated_algo_scene.py`
-- `Layout audit result`：`<project-root>/layout_audit_result.md`
+- `Project layout helper`：`<project-root>/scene_layout_audit.py`
 - `Scene review guide`：`references/how-to-review-manim-scene-code.md` 的絕對路徑
 
-`Conditional inputs`：`None — no conditional inputs`。
+`Required dispatch data` 必須包含 `Review phase`：初次為 `initial-full`，layout 收斂後為 `final-focused`。
+
+`Conditional inputs`：
+
+- `initial-full`：`None — no conditional inputs`。
+- `final-focused`：目前 `<project-root>/scene_review_result.md`、`<project-root>/layout_audit_triage.md`、raw report paths/hashes，以及所有 exception proposal paths/hashes；沒有 proposal 時明記 none。
 
 `Expected output`：`<project-root>/scene_review_result.md`。
 

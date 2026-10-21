@@ -8,10 +8,12 @@ from manim import config
 
 
 _LAYOUT_AUDIT_CHECKPOINTS: list[str] = []
+_LAYOUT_GRAPH_ROOTS: list[tuple[object, str | None]] = []
 
 
 def reset_layout_audit_checkpoints() -> None:
     _LAYOUT_AUDIT_CHECKPOINTS.clear()
+    _LAYOUT_GRAPH_ROOTS.clear()
 
 
 def get_layout_audit_checkpoints() -> list[str]:
@@ -20,6 +22,24 @@ def get_layout_audit_checkpoints() -> list[str]:
 
 def record_layout_audit_checkpoint(context: str) -> None:
     _LAYOUT_AUDIT_CHECKPOINTS.append(context)
+
+
+def register_graph_root(root: object, name: str | None = None) -> None:
+    """Register one stable structural wrapper as a graph for visible layout audit."""
+    if root is None:
+        raise ValueError("graph root must be an object")
+    if name is not None and not name.strip():
+        raise ValueError("graph name must be non-empty when provided")
+    for registered_root, registered_name in _LAYOUT_GRAPH_ROOTS:
+        if registered_root is root:
+            if registered_name != name:
+                raise ValueError("graph root is already registered with a different name")
+            return
+    _LAYOUT_GRAPH_ROOTS.append((root, name))
+
+
+def get_layout_audit_graph_roots() -> list[tuple[object, str | None]]:
+    return list(_LAYOUT_GRAPH_ROOTS)
 
 
 @dataclass(frozen=True)
