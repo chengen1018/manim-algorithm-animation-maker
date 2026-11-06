@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="1287" viewBox="0 0 1140 1287" role="img" aria-labelledby="workflow-title workflow-description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="1217" viewBox="0 0 1140 1217" role="img" aria-labelledby="workflow-title workflow-description">
 <title id="workflow-title">Manim Algorithm Animation Maker — 工作流程與責任分工</title>
 <desc id="workflow-description">左側 Stage 索引欄，中間 Main Agent / User，右側 Sub-Agent。節點位置表示執行者，形狀與色彩表示工作類型。五階段依序為教學設計、教學腳本、旁白製作、場景實作與驗證、渲染與交付。深色實線表示通過後前進，細紅色虛線回到負責修正的節點。每個 Sub-Agent 節點在左上角標明角色。</desc>
 <defs>
@@ -26,69 +26,69 @@
  .failure-label { fill:#a46f6b; }
  .legend-label { font-size:12px; fill:#6d798a; }
 </style>
-<rect id="canvas" width="1140" height="1287" fill="#ffffff"/>
+<rect id="canvas" width="1140" height="1217" fill="#ffffff"/>
 <g id="stage-index-column">
- <rect x="16" y="58" width="180" height="1167" fill="#fafbfd"/>
+ <rect x="16" y="58" width="180" height="1097" fill="#fafbfd"/>
  <text x="106" y="34" class="stage-title" text-anchor="middle">Stage</text>
- <path d="M196 58 V1225" fill="none" stroke="#dce3ec" stroke-width="1"/>
+ <path d="M196 58 V1155" fill="none" stroke="#dce3ec" stroke-width="1"/>
 </g>
 <g id="workflow-content" transform="translate(180 0)">
 <g id="ownership-lanes">
- <g id="main-user-area"><rect x="16" y="58" width="464" height="1167" fill="#fcfdfe"/><text x="260" y="34" class="lane-title" text-anchor="middle">Main Agent / User</text></g>
- <g id="sub-agent-area"><rect x="480" y="58" width="464" height="1167" fill="#f8fafc"/><text x="700" y="34" class="lane-title" text-anchor="middle">Sub-Agent</text></g>
- <path d="M480 58 V1225" fill="none" stroke="#dce3ec" stroke-width="1"/>
+ <g id="main-user-area"><rect x="16" y="58" width="464" height="1097" fill="#fcfdfe"/><text x="260" y="34" class="lane-title" text-anchor="middle">Main Agent / User</text></g>
+ <g id="sub-agent-area"><rect x="480" y="58" width="464" height="1097" fill="#f8fafc"/><text x="700" y="34" class="lane-title" text-anchor="middle">Sub-Agent</text></g>
+ <path d="M480 58 V1155" fill="none" stroke="#dce3ec" stroke-width="1"/>
 </g>
 <g id="stages">
 <g id="stage-01"><path class="stage-rule" d="M -164 58 H 944"/>
 <text x="-74" y="86" class="stage-number" text-anchor="middle">01</text>
 <text x="-74" y="110" class="stage-title" text-anchor="middle">教學設計</text>
 </g>
-<g id="stage-02"><path class="stage-rule" d="M -164 399.02 H 944"/>
-<text x="-74" y="423.02" class="stage-number" text-anchor="middle">02</text>
-<text x="-74" y="443.02" class="stage-title" text-anchor="middle">教學腳本</text>
+<g id="stage-02"><path class="stage-rule" d="M -164 388.63 H 944"/>
+<text x="-74" y="412.63" class="stage-number" text-anchor="middle">02</text>
+<text x="-74" y="432.63" class="stage-title" text-anchor="middle">教學腳本</text>
 </g>
-<g id="stage-03"><path class="stage-rule" d="M -164 603.02 H 944"/>
-<text x="-74" y="627.02" class="stage-number" text-anchor="middle">03</text>
-<text x="-74" y="647.02" class="stage-title" text-anchor="middle">旁白製作</text>
+<g id="stage-03"><path class="stage-rule" d="M -164 583.02 H 944"/>
+<text x="-74" y="607.02" class="stage-number" text-anchor="middle">03</text>
+<text x="-74" y="627.02" class="stage-title" text-anchor="middle">旁白製作</text>
 </g>
-<g id="stage-04"><path class="stage-rule" d="M -164 718.19 H 944"/>
-<text x="-74" y="742.19" class="stage-number" text-anchor="middle">04</text>
-<text x="-74" y="762.19" class="stage-title" text-anchor="middle">場景實作與驗證</text>
+<g id="stage-04"><path class="stage-rule" d="M -164 686.74 H 944"/>
+<text x="-74" y="710.74" class="stage-number" text-anchor="middle">04</text>
+<text x="-74" y="730.74" class="stage-title" text-anchor="middle">場景實作與驗證</text>
 </g>
-<g id="stage-05"><path class="stage-rule" d="M -164 1002.02 H 944"/>
-<text x="-74" y="1026.02" class="stage-number" text-anchor="middle">05</text>
-<text x="-74" y="1046.02" class="stage-title" text-anchor="middle">渲染與交付</text>
+<g id="stage-05"><path class="stage-rule" d="M -164 962.02 H 944"/>
+<text x="-74" y="986.02" class="stage-number" text-anchor="middle">05</text>
+<text x="-74" y="1006.02" class="stage-title" text-anchor="middle">渲染與交付</text>
 </g>
 </g><g id="feedback-loops">
 <path id="review-design-fail" data-from="design-review" data-to="animation-design" class="edge failure" d="M 700 164 V 152.33 H 360 V 164" marker-end="url(#failure-arrow)"/>
 <text x="535" y="147.67" class="edge-label failure-label" text-anchor="middle">FAIL</text>
 <path id="user-design-revise" data-from="design-approval" data-to="animation-design" class="edge failure" d="M 110 320 H 70 V 200 H 110" marker-end="url(#failure-arrow)"/>
 <text x="70" y="261.85" class="edge-label failure-label" text-anchor="middle">調整</text>
-<path id="script-fail" data-from="script-reviewer" data-to="script-writer" class="edge failure" d="M 850 546 H 910 V 460 H 850" marker-end="url(#failure-arrow)"/>
-<text x="910" y="504.45" class="edge-label failure-label" text-anchor="middle">FAIL</text>
-<path id="voice-fail" data-from="audio-gate" data-to="voice-generator" class="edge failure" d="M 260 621 V 614.3 H 660 V 621" marker-end="url(#failure-arrow)"/>
-<text x="460" y="611.86" class="edge-label failure-label" text-anchor="middle">FAIL</text>
-<path id="layout-fail" data-from="layout-validator" data-to="scene-writer" class="edge failure" d="M 850 859 H 890 V 773 H 850" marker-end="url(#failure-arrow)"/>
-<text x="890" y="819.14" class="edge-label failure-label" text-anchor="middle">FAIL</text>
-<path id="contract-fail" data-from="scene-reviewer" data-to="scene-writer" class="edge failure" d="M 850 945 H 930 V 773 H 850" marker-end="url(#failure-arrow)"/>
-<text x="930" y="907.31" class="edge-label failure-label" text-anchor="middle">FAIL</text>
-<path id="delivery-fail" data-from="delivery-gate" data-to="final-renderer" class="edge failure" d="M 260 1020 V 1013.29 H 660 V 1020" marker-end="url(#failure-arrow)"/>
-<text x="460" y="1010.86" class="edge-label failure-label" text-anchor="middle">FAIL</text>
+<path id="script-fail" data-from="script-reviewer" data-to="script-writer" class="edge failure" d="M 850 526 H 910 V 440 H 850" marker-end="url(#failure-arrow)"/>
+<text x="910" y="484.45" class="edge-label failure-label" text-anchor="middle">FAIL</text>
+<path id="voice-fail" data-from="audio-gate" data-to="voice-generator" class="edge failure" d="M 260 601 V 594.3 H 660 V 601" marker-end="url(#failure-arrow)"/>
+<text x="460" y="591.86" class="edge-label failure-label" text-anchor="middle">FAIL</text>
+<path id="layout-fail" data-from="layout-validator" data-to="scene-writer" class="edge failure" d="M 850 819 H 890 V 733 H 850" marker-end="url(#failure-arrow)"/>
+<text x="890" y="779.14" class="edge-label failure-label" text-anchor="middle">FAIL</text>
+<path id="contract-fail" data-from="scene-reviewer" data-to="scene-writer" class="edge failure" d="M 850 905 H 930 V 733 H 850" marker-end="url(#failure-arrow)"/>
+<text x="930" y="867.31" class="edge-label failure-label" text-anchor="middle">FAIL</text>
+<path id="delivery-fail" data-from="delivery-gate" data-to="final-renderer" class="edge failure" d="M 260 980 V 958 H 660 V 980" marker-end="url(#failure-arrow)"/>
+<text x="460" y="950" class="edge-label failure-label" text-anchor="middle">FAIL</text>
 </g><g id="success-flow">
 <path id="request-design" data-from="request" data-to="animation-design" class="edge success" d="M 260 136 V 164" marker-end="url(#success-arrow)"/>
 <path id="design-to-review" data-from="animation-design" data-to="design-review" class="edge success" d="M 410 200 H 550" marker-end="url(#success-arrow)"/>
 <path id="review-user-pass" data-from="design-review" data-to="design-approval" class="edge success" d="M 700 236 V 256.92 H 260 V 268" marker-end="url(#success-arrow)"/>
-<path id="approved-script" data-from="design-approval" data-to="script-writer" class="edge success" d="M 260 372 V 391.37 H 700 V 424" marker-end="url(#success-arrow)"/>
-<text x="287" y="385.25" class="edge-label" text-anchor="middle">核准</text>
-<path id="script-review" data-from="script-writer" data-to="script-reviewer" class="edge success" d="M 700 496 V 510" marker-end="url(#success-arrow)"/>
-<path id="script-pass" data-from="script-reviewer" data-to="voice-generator" class="edge success" d="M 700 582 V 621" marker-end="url(#success-arrow)"/>
-<path id="voice-check" data-from="voice-generator" data-to="audio-gate" class="edge success" d="M 550 657 H 410" marker-end="url(#success-arrow)"/>
-<path id="voice-pass" data-from="audio-gate" data-to="scene-writer" class="edge success" d="M 260 693 V 713.4 H 700 V 737" marker-end="url(#success-arrow)"/>
-<path id="writer-layout" data-from="scene-writer" data-to="layout-validator" class="edge success" d="M 700 809 V 823" marker-end="url(#success-arrow)"/>
-<path id="layout-review" data-from="layout-validator" data-to="scene-reviewer" class="edge success" d="M 700 895 V 909" marker-end="url(#success-arrow)"/>
-<path id="contract-pass" data-from="scene-reviewer" data-to="final-renderer" class="edge success" d="M 700 981 V 1020" marker-end="url(#success-arrow)"/>
-<path id="render-delivery" data-from="final-renderer" data-to="delivery-gate" class="edge success" d="M 550 1056 H 410" marker-end="url(#success-arrow)"/>
-<path id="delivery-pass" data-from="delivery-gate" data-to="final-video" class="edge success" d="M 260 1092 V 1111" marker-end="url(#success-arrow)"/>
+<path id="approved-script" data-from="design-approval" data-to="script-writer" class="edge success" d="M 410 320 H 470 V 440 H 550" marker-end="url(#success-arrow)"/>
+<text x="438" y="312" class="edge-label" text-anchor="middle">核准</text>
+<path id="script-review" data-from="script-writer" data-to="script-reviewer" class="edge success" d="M 700 476 V 490" marker-end="url(#success-arrow)"/>
+<path id="script-pass" data-from="script-reviewer" data-to="voice-generator" class="edge success" d="M 700 562 V 601" marker-end="url(#success-arrow)"/>
+<path id="voice-check" data-from="voice-generator" data-to="audio-gate" class="edge success" d="M 550 637 H 410" marker-end="url(#success-arrow)"/>
+<path id="voice-pass" data-from="audio-gate" data-to="scene-writer" class="edge success" d="M 260 673 V 733 H 550" marker-end="url(#success-arrow)"/>
+<path id="writer-layout" data-from="scene-writer" data-to="layout-validator" class="edge success" d="M 700 769 V 783" marker-end="url(#success-arrow)"/>
+<path id="layout-review" data-from="layout-validator" data-to="scene-reviewer" class="edge success" d="M 700 855 V 869" marker-end="url(#success-arrow)"/>
+<path id="contract-pass" data-from="scene-reviewer" data-to="final-renderer" class="edge success" d="M 700 941 V 980" marker-end="url(#success-arrow)"/>
+<path id="render-delivery" data-from="final-renderer" data-to="delivery-gate" class="edge success" d="M 550 1016 H 410" marker-end="url(#success-arrow)"/>
+<path id="delivery-pass" data-from="delivery-gate" data-to="final-video" class="edge success" d="M 260 1052 V 1071" marker-end="url(#success-arrow)"/>
 </g><g id="nodes">
 <g id="request" class="node terminal" data-owner="main-user" data-cx="260" data-cy="100"><title>使用者的演算法需求 — User</title>
 <rect class="node-shape" x="110" y="64" width="300" height="72" rx="36"/>
@@ -114,79 +114,79 @@
 <text x="240" y="298" class="owner-label" text-anchor="start">User</text>
 <text x="260" y="326" class="node-title" text-anchor="middle">使用者確認完整五幕設計</text>
 </g>
-<g id="script-writer" class="node production" data-owner="sub-agent" data-cx="700" data-cy="460"><title>撰寫逐幕教學腳本 — script_writer</title>
-<rect class="node-shape" x="550" y="424" width="300" height="72" rx="4"/>
-<g class="agent-badge"><rect x="574" y="434" width="62" height="16" rx="3"/>
-<text x="605" y="446" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="446" class="owner-label" text-anchor="start">script_writer</text>
+<g id="script-writer" class="node production" data-owner="sub-agent" data-cx="700" data-cy="440"><title>撰寫逐幕教學腳本 — script_writer</title>
+<rect class="node-shape" x="550" y="404" width="300" height="72" rx="4"/>
+<g class="agent-badge"><rect x="574" y="414" width="62" height="16" rx="3"/>
+<text x="605" y="426" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="426" class="owner-label" text-anchor="start">script_writer</text>
 </g>
-<text x="700" y="475" class="node-title" text-anchor="middle">撰寫逐幕教學腳本</text>
+<text x="700" y="455" class="node-title" text-anchor="middle">撰寫逐幕教學腳本</text>
 </g>
-<g id="script-reviewer" class="node review" data-owner="sub-agent" data-cx="700" data-cy="546"><title>審查教學內容與講解順序 — script_reviewer</title>
-<path class="node-shape" d="M 568 510 H 832 L 850 546 L 832 582 H 568 L 550 546 Z"/>
-<g class="agent-badge"><rect x="574" y="520" width="62" height="16" rx="3"/>
-<text x="605" y="532" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="532" class="owner-label" text-anchor="start">script_reviewer</text>
+<g id="script-reviewer" class="node review" data-owner="sub-agent" data-cx="700" data-cy="526"><title>審查教學內容與講解順序 — script_reviewer</title>
+<path class="node-shape" d="M 568 490 H 832 L 850 526 L 832 562 H 568 L 550 526 Z"/>
+<g class="agent-badge"><rect x="574" y="500" width="62" height="16" rx="3"/>
+<text x="605" y="512" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="512" class="owner-label" text-anchor="start">script_reviewer</text>
 </g>
-<text x="700" y="561" class="node-title" text-anchor="middle">審查教學內容與講解順序</text>
+<text x="700" y="541" class="node-title" text-anchor="middle">審查教學內容與講解順序</text>
 </g>
-<g id="voice-generator" class="node production" data-owner="sub-agent" data-cx="700" data-cy="657"><title>產生逐段旁白與語音 — voiceover_generator</title>
-<rect class="node-shape" x="550" y="621" width="300" height="72" rx="4"/>
-<g class="agent-badge"><rect x="574" y="631" width="62" height="16" rx="3"/>
-<text x="605" y="643" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="643" class="owner-label" text-anchor="start">voiceover_generator</text>
+<g id="voice-generator" class="node production" data-owner="sub-agent" data-cx="700" data-cy="637"><title>產生逐段旁白與語音 — voiceover_generator</title>
+<rect class="node-shape" x="550" y="601" width="300" height="72" rx="4"/>
+<g class="agent-badge"><rect x="574" y="611" width="62" height="16" rx="3"/>
+<text x="605" y="623" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="623" class="owner-label" text-anchor="start">voiceover_generator</text>
 </g>
-<text x="700" y="672" class="node-title" text-anchor="middle">產生逐段旁白與語音</text>
+<text x="700" y="652" class="node-title" text-anchor="middle">產生逐段旁白與語音</text>
 </g>
-<g id="audio-gate" class="node review" data-owner="main-user" data-cx="260" data-cy="657"><title>檢查旁白覆蓋與音檔完整性 — Main Agent</title>
-<path class="node-shape" d="M 128 621 H 392 L 410 657 L 392 693 H 128 L 110 657 Z"/>
-<text x="140" y="643" class="owner-label" text-anchor="start">Main Agent</text>
-<text x="260" y="672" class="node-title" text-anchor="middle">檢查旁白覆蓋與音檔完整性</text>
+<g id="audio-gate" class="node review" data-owner="main-user" data-cx="260" data-cy="637"><title>檢查旁白覆蓋與音檔完整性 — Main Agent</title>
+<path class="node-shape" d="M 128 601 H 392 L 410 637 L 392 673 H 128 L 110 637 Z"/>
+<text x="140" y="623" class="owner-label" text-anchor="start">Main Agent</text>
+<text x="260" y="652" class="node-title" text-anchor="middle">檢查旁白覆蓋與音檔完整性</text>
 </g>
-<g id="scene-writer" class="node production" data-owner="sub-agent" data-cx="700" data-cy="773"><title>依教學腳本撰寫 Manim 場景程式碼 — scene_writer</title>
-<rect class="node-shape" x="550" y="737" width="300" height="72" rx="4"/>
-<g class="agent-badge"><rect x="574" y="747" width="62" height="16" rx="3"/>
-<text x="605" y="759" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="759" class="owner-label" text-anchor="start">scene_writer</text>
+<g id="scene-writer" class="node production" data-owner="sub-agent" data-cx="700" data-cy="733"><title>依教學腳本撰寫 Manim 場景程式碼 — scene_writer</title>
+<rect class="node-shape" x="550" y="697" width="300" height="72" rx="4"/>
+<g class="agent-badge"><rect x="574" y="707" width="62" height="16" rx="3"/>
+<text x="605" y="719" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="719" class="owner-label" text-anchor="start">scene_writer</text>
 </g>
-<text x="700" y="780" class="node-title" text-anchor="middle"><tspan x="700" y="780">依教學腳本撰寫 </tspan><tspan x="700" y="801">Manim 場景程式碼</tspan></text>
+<text x="700" y="740" class="node-title" text-anchor="middle"><tspan x="700" y="740">依教學腳本撰寫 </tspan><tspan x="700" y="761">Manim 場景程式碼</tspan></text>
 </g>
-<g id="layout-validator" class="node review" data-owner="sub-agent" data-cx="700" data-cy="859"><title>正式渲染前檢查畫面版面 — scene_layout_validator</title>
-<path class="node-shape" d="M 568 823 H 832 L 850 859 L 832 895 H 568 L 550 859 Z"/>
-<g class="agent-badge"><rect x="574" y="833" width="62" height="16" rx="3"/>
-<text x="605" y="845" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="845" class="owner-label" text-anchor="start">scene_layout_validator</text>
+<g id="layout-validator" class="node review" data-owner="sub-agent" data-cx="700" data-cy="819"><title>正式渲染前檢查畫面版面 — scene_layout_validator</title>
+<path class="node-shape" d="M 568 783 H 832 L 850 819 L 832 855 H 568 L 550 819 Z"/>
+<g class="agent-badge"><rect x="574" y="793" width="62" height="16" rx="3"/>
+<text x="605" y="805" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="805" class="owner-label" text-anchor="start">scene_layout_validator</text>
 </g>
-<text x="700" y="874" class="node-title" text-anchor="middle">正式渲染前檢查畫面版面</text>
+<text x="700" y="834" class="node-title" text-anchor="middle">正式渲染前檢查畫面版面</text>
 </g>
-<g id="scene-reviewer" class="node review" data-owner="sub-agent" data-cx="700" data-cy="945"><title>檢查場景是否符合設計與腳本 — scene_reviewer</title>
-<path class="node-shape" d="M 568 909 H 832 L 850 945 L 832 981 H 568 L 550 945 Z"/>
-<g class="agent-badge"><rect x="574" y="919" width="62" height="16" rx="3"/>
-<text x="605" y="931" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="931" class="owner-label" text-anchor="start">scene_reviewer</text>
+<g id="scene-reviewer" class="node review" data-owner="sub-agent" data-cx="700" data-cy="905"><title>檢查場景是否符合設計與腳本 — scene_reviewer</title>
+<path class="node-shape" d="M 568 869 H 832 L 850 905 L 832 941 H 568 L 550 905 Z"/>
+<g class="agent-badge"><rect x="574" y="879" width="62" height="16" rx="3"/>
+<text x="605" y="891" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="891" class="owner-label" text-anchor="start">scene_reviewer</text>
 </g>
-<text x="700" y="960" class="node-title" text-anchor="middle">檢查場景是否符合設計與腳本</text>
+<text x="700" y="920" class="node-title" text-anchor="middle">檢查場景是否符合設計與腳本</text>
 </g>
-<g id="final-renderer" class="node production" data-owner="sub-agent" data-cx="700" data-cy="1056"><title>渲染五個場景並合併影片 — scene_final_renderer</title>
-<rect class="node-shape" x="550" y="1020" width="300" height="72" rx="4"/>
-<g class="agent-badge"><rect x="574" y="1030" width="62" height="16" rx="3"/>
-<text x="605" y="1042" class="badge-title" text-anchor="middle">Sub-Agent</text>
-<text x="644" y="1042" class="owner-label" text-anchor="start">scene_final_renderer</text>
+<g id="final-renderer" class="node production" data-owner="sub-agent" data-cx="700" data-cy="1016"><title>渲染五個場景並合併影片 — scene_final_renderer</title>
+<rect class="node-shape" x="550" y="980" width="300" height="72" rx="4"/>
+<g class="agent-badge"><rect x="574" y="990" width="62" height="16" rx="3"/>
+<text x="605" y="1002" class="badge-title" text-anchor="middle">Sub-Agent</text>
+<text x="644" y="1002" class="owner-label" text-anchor="start">scene_final_renderer</text>
 </g>
-<text x="700" y="1071" class="node-title" text-anchor="middle">渲染五個場景並合併影片</text>
+<text x="700" y="1031" class="node-title" text-anchor="middle">渲染五個場景並合併影片</text>
 </g>
-<g id="delivery-gate" class="node review" data-owner="main-user" data-cx="260" data-cy="1056"><title>檢查影片規格與播放完整性 — Main Agent</title>
-<path class="node-shape" d="M 128 1020 H 392 L 410 1056 L 392 1092 H 128 L 110 1056 Z"/>
-<text x="140" y="1042" class="owner-label" text-anchor="start">Main Agent</text>
-<text x="260" y="1071" class="node-title" text-anchor="middle">檢查影片規格與播放完整性</text>
+<g id="delivery-gate" class="node review" data-owner="main-user" data-cx="260" data-cy="1016"><title>檢查影片規格與播放完整性 — Main Agent</title>
+<path class="node-shape" d="M 128 980 H 392 L 410 1016 L 392 1052 H 128 L 110 1016 Z"/>
+<text x="140" y="1002" class="owner-label" text-anchor="start">Main Agent</text>
+<text x="260" y="1031" class="node-title" text-anchor="middle">檢查影片規格與播放完整性</text>
 </g>
-<g id="final-video" class="node terminal" data-owner="main-user" data-cx="260" data-cy="1147"><title>完整 Manim 演算法教學影片 — User</title>
-<rect class="node-shape" x="110" y="1111" width="300" height="72" rx="36"/>
-<text x="140" y="1133" class="owner-label" text-anchor="start">User</text>
-<text x="260" y="1162" class="node-title" text-anchor="middle">完整 Manim 演算法教學影片</text>
+<g id="final-video" class="node terminal" data-owner="main-user" data-cx="260" data-cy="1107"><title>完整 Manim 演算法教學影片 — User</title>
+<rect class="node-shape" x="110" y="1071" width="300" height="72" rx="36"/>
+<text x="140" y="1093" class="owner-label" text-anchor="start">User</text>
+<text x="260" y="1122" class="node-title" text-anchor="middle">完整 Manim 演算法教學影片</text>
 </g>
 </g>
-<g id="legend" transform="translate(34 1258)">
+<g id="legend" transform="translate(34 1188)">
  <rect x="0" y="-10" width="25" height="18" rx="2" fill="#eef5fd" stroke="#91accb"/><text x="34" y="4" class="legend-label">製作</text>
  <path d="M103 -10 H123 L129 -1 L123 8 H103 L97 -1Z" fill="#f3eff9" stroke="#ab99c1"/><text x="138" y="4" class="legend-label">審查／驗證</text>
  <path d="M270 -13 L287 -1 L270 11 L253 -1Z" fill="#edf6ef" stroke="#8eaf98"/><text x="296" y="4" class="legend-label">使用者核准</text>
