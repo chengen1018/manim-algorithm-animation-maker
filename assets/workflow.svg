@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="1137" viewBox="0 0 1140 1137" role="img" aria-labelledby="workflow-title workflow-description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1137" viewBox="0 0 1080 1137" role="img" aria-labelledby="workflow-title workflow-description">
 <title id="workflow-title">Manim Algorithm Animation Maker — 工作流程與責任分工</title>
 <desc id="workflow-description">左側 Stage 索引欄，中間 Main Agent / User，右側 Sub-Agent。節點位置表示執行者，形狀與色彩表示工作類型。五階段依序為教學設計、教學腳本、旁白製作、場景實作與驗證、渲染與交付。深色實線表示通過後前進，細紅色虛線回到負責修正的節點。每個 Sub-Agent 節點在左上角標明角色。</desc>
 <defs>
@@ -26,38 +26,38 @@
  .failure-label { fill:#a46f6b; }
  .legend-label { font-size:12px; fill:#6d798a; }
 </style>
-<rect id="canvas" width="1140" height="1137" fill="#ffffff"/>
+<rect id="canvas" width="1080" height="1137" fill="#ffffff"/>
 <g id="stage-index-column">
- <rect x="16" y="58" width="180" height="1017" fill="#fafbfd"/>
- <text x="106" y="34" class="stage-title" text-anchor="middle">Stage</text>
- <path d="M196 58 V1075" fill="none" stroke="#dce3ec" stroke-width="1"/>
+ <rect x="16" y="58" width="120" height="1017" fill="#fafbfd"/>
+ <text x="76" y="34" class="stage-title" text-anchor="middle">Stage</text>
+ <path d="M136 58 V1075" fill="none" stroke="#dce3ec" stroke-width="1"/>
 </g>
-<g id="workflow-content" transform="translate(180 0)">
+<g id="workflow-content" transform="translate(120 0)">
 <g id="ownership-lanes">
  <g id="main-user-area"><rect x="16" y="58" width="464" height="1017" fill="#fcfdfe"/><text x="260" y="34" class="lane-title" text-anchor="middle">Main Agent / User</text></g>
  <g id="sub-agent-area"><rect x="480" y="58" width="464" height="1017" fill="#f8fafc"/><text x="700" y="34" class="lane-title" text-anchor="middle">Sub-Agent</text></g>
  <path d="M480 58 V1075" fill="none" stroke="#dce3ec" stroke-width="1"/>
 </g>
 <g id="stages">
-<g id="stage-01"><path class="stage-rule" d="M -164 58 H 944"/>
-<text x="-74" y="87.56" class="stage-number" text-anchor="middle">01</text>
-<text x="-74" y="108.89" class="stage-title" text-anchor="middle">教學設計</text>
+<g id="stage-01"><path class="stage-rule" d="M -104 58 H 944"/>
+<text x="-44" y="87.56" class="stage-number" text-anchor="middle">01</text>
+<text x="-44" y="108.89" class="stage-title" text-anchor="middle">教學設計</text>
 </g>
-<g id="stage-02"><path class="stage-rule" d="M -164 368.63 H 944"/>
-<text x="-74" y="392.63" class="stage-number" text-anchor="middle">02</text>
-<text x="-74" y="412.63" class="stage-title" text-anchor="middle">教學腳本</text>
+<g id="stage-02"><path class="stage-rule" d="M -104 368.63 H 944"/>
+<text x="-44" y="392.63" class="stage-number" text-anchor="middle">02</text>
+<text x="-44" y="412.63" class="stage-title" text-anchor="middle">教學腳本</text>
 </g>
-<g id="stage-03"><path class="stage-rule" d="M -164 547.02 H 944"/>
-<text x="-74" y="571.02" class="stage-number" text-anchor="middle">03</text>
-<text x="-74" y="591.02" class="stage-title" text-anchor="middle">旁白製作</text>
+<g id="stage-03"><path class="stage-rule" d="M -104 547.02 H 944"/>
+<text x="-44" y="571.02" class="stage-number" text-anchor="middle">03</text>
+<text x="-44" y="591.02" class="stage-title" text-anchor="middle">旁白製作</text>
 </g>
-<g id="stage-04"><path class="stage-rule" d="M -164 642.74 H 944"/>
-<text x="-74" y="666.74" class="stage-number" text-anchor="middle">04</text>
-<text x="-74" y="686.74" class="stage-title" text-anchor="middle">場景實作與驗證</text>
+<g id="stage-04"><path class="stage-rule" d="M -104 642.74 H 944"/>
+<text x="-44" y="666.74" class="stage-number" text-anchor="middle">04</text>
+<text x="-44" y="686.74" class="stage-title" text-anchor="middle">場景實作與驗證</text>
 </g>
-<g id="stage-05"><path class="stage-rule" d="M -164 894.02 H 944"/>
-<text x="-74" y="918.02" class="stage-number" text-anchor="middle">05</text>
-<text x="-74" y="938.02" class="stage-title" text-anchor="middle">渲染與交付</text>
+<g id="stage-05"><path class="stage-rule" d="M -104 894.02 H 944"/>
+<text x="-44" y="918.02" class="stage-number" text-anchor="middle">05</text>
+<text x="-44" y="938.02" class="stage-title" text-anchor="middle">渲染與交付</text>
 </g>
 </g><g id="feedback-loops">
 <path id="review-design-fail" data-from="design-review" data-to="animation-design" class="edge failure" d="M 700 160 V 148.33 H 360 V 160" marker-end="url(#failure-arrow)"/>
